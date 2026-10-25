@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>WebSnap</title>
+<script>
+ // GitHub Pages shows this file for unknown paths like /WebSnap/try-demo.
+ // Remember the path, then send the visitor to the main page, which scrolls to the right section.
+ sessionStorage.setItem('ws-path', location.pathname + location.search + location.hash);
+ location.replace('/' + location.pathname.split('/')[1] + '/');
+</script>
+</head>
+<body></body>
+</html>
