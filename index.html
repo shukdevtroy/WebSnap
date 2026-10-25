@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WebSnap — Headless Browser Screenshot Studio</title>
+<meta name="description" content="Pixel-perfect full-page screenshots of any website, in one click.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2338b6e0'/%3E%3Cstop offset='.5' stop-color='%236366f1'/%3E%3Cstop offset='1' stop-color='%23b030d8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect x='2' y='2' width='60' height='60' rx='15' fill='url(%23g)'/%3E%3Cpath d='M14 21v-7h7M43 14h7v7M50 43v7h-7M21 50h-7v-7' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='32' cy='32' r='11' fill='white'/%3E%3Ccircle cx='32' cy='32' r='7.6' fill='%23181848'/%3E%3Ccircle cx='32' cy='32' r='4.9' fill='%236366f1'/%3E%3Ccircle cx='32' cy='32' r='2.3' fill='%2322d3ee'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Manrope:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--bg:#0b0b10;--card:#14141c;--alt:#0e0e14;--bd:#26263a;--ac:#7c5cff;--ac2:#6a49f0;--cy:#22d3ee;--tx:#f4f4f8;--mu:#8b8ba3;--dim:#5b5b73;--ok:#4ade80;--er:#f87171;--info:#38bdf8;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-behavior:smooth;scroll-padding-top:calc(env(safe-area-inset-top,0px) + 72px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:400 16px/1.6 Manrope,"Segoe UI",system-ui,sans-serif;overflow-x:hidden}
+h1,h2,h3{font-family:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;margin:0;line-height:1.05;letter-spacing:-.02em}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--cy);outline-offset:3px;border-radius:6px}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+.glow{position:absolute;inset:0 0 auto 0;height:900px;pointer-events:none;background:radial-gradient(600px 400px at 20% 0,#7c5cff40,transparent 70%),radial-gradient(500px 380px at 85% 10%,#22d3ee26,transparent 70%)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:60}
+nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:#0b0b10cc;backdrop-filter:blur(14px);border-bottom:1px solid #26263a99}
+nav .wrap{display:flex;align-items:center;gap:28px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;font:800 20px "Bricolage Grotesque",sans-serif}
+.logo{display:block;flex:none}
+.brand .logo{width:32px;height:32px}
+nav .links{display:flex;gap:24px;margin-left:auto;color:var(--mu);font-size:14px;font-weight:500}
+nav .links a:hover{color:var(--tx)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 24px;border-radius:12px;border:1px solid var(--bd);background:#1e1e2c;color:var(--tx);font:700 15px Manrope,sans-serif;cursor:pointer;transition:background .2s,transform .2s}
+.btn:hover{background:#2b2b3f}
+.btn.pri{background:var(--ac);border-color:var(--ac);box-shadow:0 10px 40px #7c5cff55}
+.btn.pri:hover{background:var(--ac2);transform:translateY(-2px)}
+.btn.sm{height:38px;padding:0 16px;font-size:14px;border-radius:10px}
+section{position:relative;padding:96px 0}
+.hero{padding:72px 0 40px;text-align:center;overflow:hidden}
+.hero h1{font-size:clamp(44px,8vw,96px);font-weight:800;max-width:900px;margin:0 auto}
+.grad{background:linear-gradient(100deg,#38bdf8,#7c5cff 55%,#c026d3);-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero p.lead{font-size:clamp(17px,2.2vw,21px);color:var(--mu);max-width:640px;margin:24px auto 36px}
+.cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.note{color:var(--dim);font-size:13px;margin-top:16px}
+/* app demo */
+.app{margin:64px auto 0;max-width:1060px;text-align:left;background:var(--bg);border:1px solid var(--bd);border-radius:20px;box-shadow:0 40px 120px #7c5cff33,0 0 0 1px #ffffff08;overflow:hidden}
+.bar{display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--alt);border-bottom:1px solid var(--bd);font-size:12px;color:var(--mu)}
+.bar i{width:11px;height:11px;border-radius:50%;background:#26263a}.bar span{margin:0 auto}
+.panes{display:grid;grid-template-columns:4fr 6fr;gap:16px;padding:16px}
+.pane{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:18px}
+.lbl{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--mu);margin:14px 0 6px}
+.field{width:100%;height:40px;border-radius:10px;border:1px solid var(--bd);background:var(--alt);color:var(--tx);font:500 13px Manrope,sans-serif;padding:0 12px}
+.opts{background:var(--alt);border:1px solid var(--bd);border-radius:14px;padding:6px 14px}
+.sw{display:flex;align-items:center;gap:12px;padding:8px 0;font-size:13px;cursor:pointer;background:none;border:0;color:var(--tx);width:100%;text-align:left;font-family:inherit}
+.sw b{flex:none;width:36px;height:20px;border-radius:20px;background:var(--bd);position:relative;transition:background .2s}
+.sw b::after{content:"";position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .2s}
+.sw[aria-pressed=true] b{background:var(--ac)}.sw[aria-pressed=true] b::after{transform:translateX(16px)}
+.go{width:100%;margin-top:16px;height:50px;font-size:15px}
+.prog{height:6px;border-radius:6px;background:var(--bd);margin-top:12px;overflow:hidden}
+.prog div{height:100%;width:0;background:var(--ac);transition:width .4s}
+.prog.run div{width:40%;animation:ind 1.1s ease-in-out infinite}
+@keyframes ind{0%{margin-left:-40%}100%{margin-left:100%}}
+#st{font-size:12px;color:var(--dim);margin-top:10px;min-height:18px}
+.pv{display:flex;flex-direction:column}
+.pv h3{font-size:18px;margin-bottom:12px}
+.tops{display:flex;gap:8px}
+/* live preview */
+.stage{flex:1;min-height:340px;max-height:430px;background:var(--alt);border:1px solid var(--bd);border-radius:14px;overflow:auto;padding:12px;position:relative}
+.info{font-size:12px;color:var(--mu);margin-top:10px;min-height:18px;line-height:1.5}
+.info b{color:var(--cy);font-weight:700}
+.mkw{margin:0 auto;position:relative;overflow:hidden;border-radius:6px;background:#fff;box-shadow:0 10px 40px #000a}
+.mkw.flash{animation:rev 1s ease-out}
+@keyframes rev{from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0)}}
+.mk{position:absolute;left:0;top:0;transform-origin:0 0;background:#fff;color:#1f2340;font:400 20px/1.5 system-ui,sans-serif;overflow:hidden}
+.mk .nv{height:72px;display:flex;align-items:center;gap:20px;padding:0 32px;background:#eef;border-bottom:1px solid #dde}
+.mk .nv b{width:36px;height:36px;border-radius:10px;background:#7c5cff}
+.mk .nv i{width:90px;height:12px;border-radius:6px;background:#c7c7e8}
+.mk .hero2{height:420px;padding:90px 32px;color:#fff;background:linear-gradient(135deg,#38bdf8,#7c5cff)}
+.mk .hero2 h4{margin:0 0 12px;font:800 52px/1.1 system-ui,sans-serif}
+.mk .hero2 p{margin:0;font-size:22px;opacity:.9}
+.mk .rw{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;padding:40px 32px}
+.mk .lz{height:220px;border-radius:12px;position:relative;background:#e5e7f5;border:3px dashed #b9bce0}
+.mk .lz::after{content:attr(data-s);position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:8px;font-size:20px;font-weight:700;color:#8b8ba3}
+.mk .lz.ld{border:0;background:linear-gradient(135deg,#22d3ee,#7c5cff)}
+.mk .lz.ld::after{color:#fff}
+.mk .lz.wide{margin:0 32px;height:360px}
+.mk .tx{padding:32px}
+.mk .tx span{display:block;height:16px;border-radius:8px;background:#dfe1f3;margin:14px 0}
+.mk .ft{height:200px;background:#14141c;color:#8b8ba3;display:grid;place-items:center}
+.mk .ck{position:absolute;left:0;right:0;z-index:3;display:flex;gap:16px;align-items:center;justify-content:space-between;padding:24px 32px;background:#14141c;color:#fff;font-size:22px;box-shadow:0 -8px 30px #0008}
+.mk .ck u{text-decoration:none;background:#7c5cff;padding:10px 26px;border-radius:8px;font-weight:700;white-space:nowrap}
+.mk .fold{position:absolute;left:0;right:0;height:0;border-top:4px dashed #f87171;z-index:4}
+.mk .fold span{position:absolute;right:12px;top:6px;background:#f87171;color:#fff;font-size:22px;font-weight:700;padding:4px 14px;border-radius:6px}
+.mk.nar{font-size:18px}
+.mk.nar .hero2{height:340px;padding:60px 20px}
+.mk.nar .hero2 h4{font-size:38px}
+.mk.nar .rw{grid-template-columns:1fr;padding:24px 16px}
+.mk.nar .lz.wide{margin:0 16px;height:260px}
+.mk.nar .ck{flex-direction:column;align-items:stretch;text-align:center;font-size:20px;padding:20px 16px}
+/* generic */
+.sec-h{max-width:720px;margin:0 auto 56px;text-align:center}
+.sec-h h2{font-size:clamp(32px,5vw,56px);font-weight:800}
+.sec-h p{color:var(--mu);font-size:18px;margin:16px 0 0}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.f{background:var(--card);border:1px solid var(--bd);border-radius:18px;padding:28px}
+.f.big{grid-column:span 2;background:linear-gradient(135deg,#7c5cff26,var(--card) 60%)}
+.f h3{font-size:22px;margin:14px 0 8px;letter-spacing:-.01em}
+.f p{margin:0;color:var(--mu);font-size:15px}
+.ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(135deg,#38bdf8,#7c5cff);box-shadow:0 8px 24px #7c5cff44}
+.ic svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* viewports */
+.vp{display:grid;grid-template-columns:1fr 1.3fr;gap:48px;align-items:center}
+.vp h2{font-size:clamp(32px,5vw,52px);font-weight:800}
+.vp p{color:var(--mu);font-size:18px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+.tab{height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--mu);font:700 13px Manrope,sans-serif;cursor:pointer}
+.tab[aria-selected=true]{background:var(--ac);border-color:var(--ac);color:#fff}
+.vstage{height:380px;display:grid;place-items:center;background:var(--card);border:1px solid var(--bd);border-radius:18px}
+.frame{height:270px;aspect-ratio:16/9;max-width:90%;border:2px solid var(--ac);border-radius:12px;background:linear-gradient(160deg,#7c5cff33,#22d3ee1a);display:grid;place-items:center;font:800 22px "Bricolage Grotesque",sans-serif;transition:aspect-ratio .5s,height .5s;box-shadow:0 0 60px #7c5cff44}
+.frame small{display:block;font:500 13px Manrope,sans-serif;color:var(--mu);text-align:center}
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;counter-reset:s}
+.st{padding:24px;border-left:2px solid var(--bd);counter-increment:s}
+.st::before{content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--ac);font-weight:800;margin-bottom:14px}
+.st h3{font-size:19px;margin-bottom:6px}.st p{margin:0;color:var(--mu);font-size:14px}
+/* faq */
+details{border-bottom:1px solid var(--bd);padding:20px 0;max-width:760px;margin:0 auto}
+summary{font:700 18px "Bricolage Grotesque",sans-serif;cursor:pointer;list-style:none;display:flex;justify-content:space-between}
+summary::after{content:"+";color:var(--ac);font-size:24px;line-height:1}details[open] summary::after{content:"–"}
+details p{color:var(--mu);margin:12px 0 0}
+.final{text-align:center;margin:0 24px}
+.final .box{max-width:1000px;margin:0 auto;padding:72px 24px;border-radius:28px;border:1px solid var(--bd);background:radial-gradient(500px 300px at 50% 0,#7c5cff55,transparent 70%),var(--card)}
+.final .logo{width:96px;height:96px;margin:0 auto;filter:drop-shadow(0 16px 40px #7c5cff88);animation:fl 4s ease-in-out infinite}
+@keyframes fl{50%{transform:translateY(-10px)}}
+.final h2{font-size:clamp(34px,6vw,64px);font-weight:800;margin:24px 0 16px}
+.final p{color:var(--mu);font-size:18px;margin:0 auto 32px;max-width:520px}
+footer{padding:40px 0;color:var(--dim);font-size:13px;text-align:center}
+@media(max-width:900px){.panes,.vp{grid-template-columns:1fr}.grid{grid-template-columns:1fr 1fr}.f.big{grid-column:span 2}.steps{grid-template-columns:1fr 1fr}nav .links{display:none}nav .btn{margin-left:auto}}
+@media(max-width:560px){.grid,.steps{grid-template-columns:1fr}.f.big{grid-column:auto}section{padding:64px 0}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<!-- WebSnap logo (defined once, reused with <use href="#ws-logo">) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+<defs>
+<linearGradient id="ws-bg" x1="0" y1="0" x2="1" y2="1">
+<stop offset="0" stop-color="#3db4e0"/>
+<stop offset=".5" stop-color="#6366f1"/>
+<stop offset="1" stop-color="#b030d8"/>
+</linearGradient>
+<linearGradient id="ws-gloss" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" stop-color="#ffffff" stop-opacity=".16"/>
+<stop offset="1" stop-color="#ffffff" stop-opacity=".1"/>
+</linearGradient>
+<filter id="ws-sh" x="-30%" y="-30%" width="160%" height="170%">
+<feDropShadow dx="0" dy="22" stdDeviation="20" flood-color="#1b1060" flood-opacity=".45"/>
+</filter>
+<clipPath id="ws-clip"><rect x="32" y="32" width="960" height="960" rx="230"/></clipPath>
+<symbol id="ws-logo" viewBox="0 0 1024 1024">
+<rect x="32" y="32" width="960" height="960" rx="230" fill="url(#ws-bg)"/>
+<g clip-path="url(#ws-clip)">
+<path d="M0 290 Q512 560 1024 290 V0 H0 Z" fill="url(#ws-gloss)"/>
+</g>
+<g filter="url(#ws-sh)" fill="none" stroke="#fff" stroke-width="58" stroke-linecap="round" stroke-linejoin="round">
+<path d="M218 332V218H332"/>
+<path d="M806 332V218H692"/>
+<path d="M218 692V806H332"/>
+<path d="M806 692V806H692"/>
+</g>
+<g filter="url(#ws-sh)">
+<circle cx="512" cy="512" r="175" fill="#fff"/>
+</g>
+<circle cx="512" cy="512" r="122" fill="#181848"/>
+<circle cx="512" cy="512" r="79" fill="#6366f1"/>
+<circle cx="512" cy="512" r="37" fill="#22d3ee"/>
+<circle cx="469" cy="465" r="19" fill="#eeeef6"/>
+</symbol>
+</defs>
+</svg>
+
+<nav><div class="wrap">
+<a class="brand" href="#top"><svg class="logo" viewBox="0 0 1024 1024" role="img" aria-label="WebSnap logo"><use href="#ws-logo"/></svg>WebSnap</a>
+<div class="links"><a href="#demo">Try Demo</a><a href="#features">Features</a><a href="#viewports">Viewports</a><a href="#how">How it works</a><a href="#faq">FAQ</a></div>
+<a class="btn pri sm" href="#download">Download</a>
+</div></nav>
+
+<header class="hero" id="top"><div class="glow"></div><div class="wrap" style="position:relative">
+<h1>Every pixel of the web, <span class="grad">in one click.</span></h1>
+<p class="lead">WebSnap is a desktop studio that opens any page in a real headless browser, scrolls it, clears the clutter, and hands you a flawless full-page screenshot.</p>
+<div class="cta"><a class="btn pri" href="#download">Download WebSnap</a><a class="btn" href="#demo">Try the demo below</a></div>
+<p class="note">Free to try · Built on Playwright &amp; Chromium · Runs on your own machine</p>
+
+<div class="app" id="demo">
+<div class="bar"><i></i><i></i><i></i><span>WebSnap — Headless Browser Screenshot Studio</span></div>
+<div class="panes">
+<div class="pane">
+<div style="display:flex;align-items:center;gap:12px"><svg class="logo" width="44" height="44" viewBox="0 0 1024 1024" role="img" aria-label="WebSnap logo"><use href="#ws-logo"/></svg><div><div style="font:800 22px 'Bricolage Grotesque',sans-serif">WebSnap</div><div style="font-size:12px;color:var(--mu)">Pixel-perfect full-page screenshots</div></div></div>
+<div class="lbl">Target URL</div><input class="field" id="url" value="https://example.com" aria-label="Target URL">
+<div class="lbl">Viewport preset</div>
+<select class="field" id="pre" aria-label="Viewport preset"><option value="1920x1080">Desktop (1920 x 1080)</option><option value="1280x720" selected>Standard Laptop (1280 x 720)</option><option value="768x1024">Tablet (768 x 1024)</option><option value="390x844">Mobile iPhone 14 (390 x 844)</option></select>
+<div class="lbl">Capture options</div>
+<div class="opts">
+<button class="sw" id="fl" aria-pressed="true"><b></b>Full Page Capture</button>
+<button class="sw" aria-pressed="true" id="sc"><b></b>Auto-scroll to trigger lazy-loaded images</button>
+<button class="sw" aria-pressed="true" id="hb"><b></b>Hide sticky cookie / consent banners</button>
+</div>
+<button class="btn pri go" id="go">Capture High-Res Screenshot</button>
+<div class="prog" id="pg"><div></div></div><div id="st">Ready</div>
+</div>
+<div class="pane pv">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3 style="margin:0">Live Preview</h3><div class="tops"><span class="btn sm" style="opacity:.4">Open Image</span><span class="btn sm" style="opacity:.4">Open Folder</span></div></div>
+<div class="stage" id="stage"><div class="mkw" id="mkw"><div class="mk" id="mk"></div></div></div>
+<div class="info" id="info"></div>
+</div>
+</div>
+</div>
+</div></header>
+
+<section id="features"><div class="wrap">
+<div class="sec-h"><h2>Screenshots that get it right the first time.</h2><p>No half-loaded images. No cookie popups covering your hero. Just the page, exactly as it should look.</p></div>
+<div class="grid">
+<div class="f big"><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/><circle cx="12" cy="12" r="3"/></svg></div><h3>True full-page capture</h3><p>Top to bottom, in a single high-resolution image. Switch it off any time to grab just the visible viewport.</p></div>
+<div class="f"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v18M6 15l6 6 6-6"/></svg></div><h3>Lazy-load wake-up</h3><p>WebSnap scrolls the whole page first, so images and animations that wait for the viewer actually appear.</p></div>
+<div class="f"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 4l16 16M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.1A10 10 0 0 1 22 12a10 10 0 0 1-2.2 3.2M6.6 6.6A10 10 0 0 0 2 12s3.5 7 10 7a9.7 9.7 0 0 0 4.4-1"/></svg></div><h3>Banner buster</h3><p>Hides sticky cookie, consent, GDPR and modal overlays before the shutter clicks.</p></div>
+<div class="f"><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></div><h3>Device presets</h3><p>Desktop, laptop, tablet and iPhone 14 in a click. Or type any custom width and height.</p></div>
+<div class="f"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h3>Settle delay</h3><p>Add up to 10 extra seconds after load for slow animations, fonts and late scripts.</p></div>
+<div class="f"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div><h3>Never overwrites</h3><p>Saving to a name that exists? WebSnap quietly adds (1), (2) and keeps your older shots safe.</p></div>
+<div class="f big"><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M3 15l5-5 4 4 3-3 6 6"/></svg></div><h3>See it instantly</h3><p>A live preview appears right beside your settings with the final dimensions. Open the image or jump to its folder with one click.</p></div>
+</div></div></section>
+
+<section id="viewports" style="background:var(--alt)"><div class="wrap vp">
+<div><h2>Every screen. Same quality.</h2><p>See your site the way your visitors do, from a 1920-wide monitor to a phone in a pocket.</p>
+<div class="tabs" role="tablist"><button class="tab" role="tab" data-w="1920" data-h="1080" aria-selected="false">Desktop</button><button class="tab" role="tab" data-w="1280" data-h="720" aria-selected="true">Laptop</button><button class="tab" role="tab" data-w="768" data-h="1024" aria-selected="false">Tablet</button><button class="tab" role="tab" data-w="390" data-h="844" aria-selected="false">iPhone 14</button></div></div>
+<div class="vstage"><div class="frame" id="fr"><div>1280 × 720<small>Standard Laptop</small></div></div></div>
+</div></section>
+
+<section id="how"><div class="wrap">
+<div class="sec-h"><h2>From URL to image in four moves.</h2><p>It’s a real Chromium browser running quietly behind the scenes, with nothing for you to install separately.</p></div>
+<div class="steps">
+<div class="st"><h3>Paste a URL</h3><p>Type any address. WebSnap adds https:// for you if you forget.</p></div>
+<div class="st"><h3>Choose a size</h3><p>Pick a preset or enter your own width and height.</p></div>
+<div class="st"><h3>Set your options</h3><p>Full page, auto-scroll, banner hiding and a settle delay.</p></div>
+<div class="st"><h3>Capture</h3><p>A progress bar tells you each stage. Your image lands where you chose.</p></div>
+</div></div></section>
+
+<section style="background:var(--alt)"><div class="wrap">
+<div class="sec-h"><h2>Built to be dependable.</h2></div>
+<div class="grid">
+<div class="f"><h3>Bundled Chromium</h3><p>The browser engine ships inside the app. If it can’t start, WebSnap falls back to Microsoft Edge or Google Chrome on your PC.</p></div>
+<div class="f"><h3>Stays responsive</h3><p>Captures run on a background thread, so the window never freezes while a page loads.</p></div>
+<div class="f"><h3>Clear when things go wrong</h3><p>Bad size? Missing URL? Failed load? You get a plain message that says what to fix.</p></div>
+</div></div></section>
+
+<section id="faq"><div class="wrap">
+<div class="sec-h"><h2>Questions, answered.</h2></div>
+<details><summary>What does WebSnap capture?</summary><p>Any public web page, either the full scrolling page or just the visible viewport, saved as a PNG or JPEG.</p></details>
+<details><summary>Do I need to install a browser?</summary><p>No. Chromium is bundled in the app. Edge or Chrome are used only as a backup.</p></details>
+<details><summary>Where do my screenshots go?</summary><p>To the folder you choose with Browse. The default is your Pictures folder, and nothing gets uploaded anywhere.</p></details>
+<details><summary>Why are some images missing in other tools?</summary><p>Many sites load images only when you scroll to them. Auto-scroll fixes that, so everything is there before the capture.</p></details>
+<details><summary>Which platforms are supported?</summary><p>The app is packaged as a Windows executable. It also opens files and folders natively on macOS and Linux when run from source.</p></details>
+</div></section>
+
+<section id="download" style="padding-top:40px"><div class="final"><div class="box">
+<svg class="logo" viewBox="0 0 1024 1024" role="img" aria-label="WebSnap logo"><use href="#ws-logo"/></svg>
+<h2>Your next screenshot is <span class="grad">one click away.</span></h2>
+<p>Download WebSnap and capture your first page in under a minute.</p>
+<a class="btn pri" href="https://drive.google.com/file/d/1BD6B9QUQMkHGdVAwRw9hLeR2kSSyH5bL/view?usp=sharing" style="height:56px;font-size:17px;padding:0 36px">Download for Windows</a>
+</div></div></section>
+<footer>© 2026 WebSnap. Crafted with care for people who care about pixels.</footer>
+
+<script>
+const $=s=>document.querySelector(s);
+const on=id=>$(id).getAttribute('aria-pressed')==='true';
+const go=$('#go'),st=$('#st'),pg=$('#pg');
+let last={w:1280,h:720};
+
+const pageHTML=()=>`
+<div class="nv"><b></b><i></i><i></i><i></i></div>
+<div class="hero2"><h4>Your product, beautifully shown</h4><p>Hero section (above the fold)</p></div>
+<div class="rw"><div class="lz"></div><div class="lz"></div><div class="lz"></div></div>
+<div class="tx"><span></span><span></span><span style="width:70%"></span></div>
+<div class="lz wide"></div>
+<div class="rw"><div class="lz"></div><div class="lz"></div><div class="lz"></div></div>
+<div class="ft">Footer</div>
+<div class="ck"><span>🍪 We use cookies to improve your experience.</span><u>Accept all</u></div>
+<div class="fold"><span>▲ Viewport ends</span></div>`;
+
+function render(){
+ const [w,h]=$('#pre').value.split('x').map(Number);
+ const full=on('#fl'),sc=on('#sc'),hb=on('#hb');
+ const mk=$('#mk'),wr=$('#mkw'),stage=$('#stage');
+ mk.className='mk'+(w<600?' nar':'');
+ mk.style.cssText='width:'+w+'px;height:auto;transform:none';
+ mk.innerHTML=pageHTML();
+
+ const nat=mk.offsetHeight, shown=full?Math.max(nat,h):h;
+ mk.style.height=shown+'px';
+
+ // lazy images: loaded if auto-scroll is on, or if they start inside the first viewport
+ let lazyTotal=0,lazyLoaded=0;
+ mk.querySelectorAll('.lz').forEach(el=>{
+  const ld=sc||el.offsetTop<h; lazyTotal++; if(ld)lazyLoaded++;
+  el.classList.toggle('ld',ld);
+  el.dataset.s=ld?'✓ image loaded':'⏳ not loaded (lazy)';
+ });
+
+ // cookie banner sits at the bottom of the first viewport
+ const ck=mk.querySelector('.ck');
+ if(hb){ck.style.display='none'}
+ else{ck.style.display='flex';ck.style.top=(h-ck.offsetHeight)+'px'}
+
+ // fold line
+ const fold=mk.querySelector('.fold');
+ if(full&&shown>h){fold.style.display='block';fold.style.top=h+'px'}else fold.style.display='none';
+
+ // scale to fit the stage
+ const availW=stage.clientWidth-26;
+ const s=Math.min(availW/w,330/h,1);
+ mk.style.transform='scale('+s+')';
+ wr.style.width=Math.round(w*s)+'px';
+ wr.style.height=Math.round(shown*s)+'px';
+ stage.scrollTop=0;
+
+ last={w,h:shown};
+ const parts=[
+  '<b>'+(full?'Full page':'Viewport only')+'</b> · '+w+' × '+shown+' px',
+  sc?'all lazy images loaded':'lazy images below the fold stay empty ('+lazyLoaded+'/'+lazyTotal+' loaded)',
+  hb?'cookie banner hidden':'cookie banner visible'
+ ];
+ $('#info').innerHTML=parts.join(' · ')+(full&&shown>h?'<br>Scroll the preview to see the full page; the red line marks where a viewport-only shot would end.':'');
+}
+
+document.querySelectorAll('.sw').forEach(b=>b.onclick=()=>{
+ b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')!=='true');
+ render();
+});
+$('#pre').addEventListener('change',render);
+addEventListener('resize',render);
+render();
+
+go.onclick=()=>{
+ if(go.disabled)return;
+ const seq=['Initializing headless browser...','Launching browser engine...','Fetching page & network assets...'];
+ if(on('#sc'))seq.push('Scrolling to load dynamic images...');
+ seq.push('Waiting extra 1.0s for settle...');
+ if(on('#hb'))seq.push('Dismissing fixed cookie overlays...');
+ seq.push(on('#fl')?'Stitching full-page image...':'Capturing visible viewport...');
+ go.disabled=true;go.textContent='Processing Capture...';pg.className='prog run';st.style.color='var(--info)';
+ let i=0;(function n(){
+  if(i<seq.length){st.textContent=seq[i++];setTimeout(n,650)}
+  else{
+   render();
+   pg.className='prog';pg.firstChild.style.width='100%';
+   st.textContent='Saved: screenshot.png  ('+last.w+' x '+last.h+')';st.style.color='var(--ok)';
+   const wr=$('#mkw');wr.classList.remove('flash');void wr.offsetWidth;wr.classList.add('flash');
+   go.disabled=false;go.textContent='Capture High-Res Screenshot';
+  }})();
+};
+
+const fr=$('#fr');
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
+ document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected','false'));
+ t.setAttribute('aria-selected','true');
+ const w=+t.dataset.w,h=+t.dataset.h;
+ fr.style.aspectRatio=w+'/'+h;fr.style.height=h>w?'340px':'270px';
+ fr.firstChild.innerHTML=w+' × '+h+'<small>'+t.textContent+'</small>';
+});
+</script>
+</body>
+</html>
