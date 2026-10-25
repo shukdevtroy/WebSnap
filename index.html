@@ -378,6 +378,55 @@ document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
 });
 addEventListener('resize',sizeFrame);
 sizeFrame();
+
+/* Clean URLs: /WebSnap/try-demo instead of /WebSnap/#demo
+   Works together with 404.html (needed for refresh / direct visits on GitHub Pages). */
+(function(){
+ if(!/^https?:$/.test(location.protocol))return; // skip when opened as a local file
+ const BASE=location.hostname.endsWith('github.io')?'/'+location.pathname.split('/')[1]+'/':'/';
+ const ROUTES={'try-demo':'demo','features':'features','viewports':'viewports','how-it-works':'how','faq':'faq','download':'download'};
+ const slugOf=id=>Object.keys(ROUTES).find(k=>ROUTES[k]===id);
+
+ function scrollToId(id){
+  const el=document.getElementById(id);
+  if(el)el.scrollIntoView({behavior:'smooth',block:'start'});
+ }
+
+ // intercept every in-page link (header menu, Download button, logo, hero buttons)
+ document.querySelectorAll('a[href^="#"]').forEach(a=>{
+  a.addEventListener('click',e=>{
+   const id=a.getAttribute('href').slice(1);
+   if(id==='top'){
+    e.preventDefault();
+    window.scrollTo({top:0,behavior:'smooth'});
+    history.pushState(null,'',BASE);
+    return;
+   }
+   const slug=slugOf(id);
+   if(!slug)return;
+   e.preventDefault();
+   scrollToId(id);
+   history.pushState(null,'',BASE+slug);
+  });
+ });
+
+ // restore the section after a direct visit / refresh (404.html sends visitors here)
+ const saved=sessionStorage.getItem('ws-path');
+ if(saved){
+  sessionStorage.removeItem('ws-path');
+  const slug=saved.replace(BASE,'').replace(/\/+$/,'').split(/[?#]/)[0];
+  if(ROUTES[slug]){
+   history.replaceState(null,'',BASE+slug);
+   window.addEventListener('load',()=>setTimeout(()=>scrollToId(ROUTES[slug]),150));
+  }
+ }
+
+ // browser back / forward buttons
+ addEventListener('popstate',()=>{
+  const slug=location.pathname.replace(BASE,'').replace(/\/+$/,'');
+  ROUTES[slug]?scrollToId(ROUTES[slug]):window.scrollTo({top:0,behavior:'smooth'});
+ });
+})();
 </script>
 </body>
 </html>
