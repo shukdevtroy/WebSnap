@@ -113,9 +113,10 @@ section{position:relative;padding:96px 0}
 .tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
 .tab{height:40px;padding:0 16px;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--mu);font:700 13px Manrope,sans-serif;cursor:pointer}
 .tab[aria-selected=true]{background:var(--ac);border-color:var(--ac);color:#fff}
-.vstage{height:380px;display:grid;place-items:center;background:var(--card);border:1px solid var(--bd);border-radius:18px}
-.frame{height:270px;aspect-ratio:16/9;max-width:90%;border:2px solid var(--ac);border-radius:12px;background:linear-gradient(160deg,#7c5cff33,#22d3ee1a);display:grid;place-items:center;font:800 22px "Bricolage Grotesque",sans-serif;transition:aspect-ratio .5s,height .5s;box-shadow:0 0 60px #7c5cff44}
-.frame small{display:block;font:500 13px Manrope,sans-serif;color:var(--mu);text-align:center}
+.vstage{height:380px;display:grid;place-items:center;background:var(--card);border:1px solid var(--bd);border-radius:18px;overflow:hidden}
+/* frame is sized from the real pixel dimensions (see script), so every device looks different */
+.frame{width:282px;height:158px;border:2px solid var(--ac);border-radius:10px;background:linear-gradient(160deg,#7c5cff33,#22d3ee1a);display:grid;place-items:center;font:800 16px "Bricolage Grotesque",sans-serif;transition:width .5s,height .5s,font-size .5s;box-shadow:0 0 60px #7c5cff44;text-align:center;overflow:hidden}
+.frame small{display:block;font:500 12px Manrope,sans-serif;color:var(--mu);text-align:center}
 /* steps */
 .steps{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;counter-reset:s}
 .st{padding:24px;border-left:2px solid var(--bd);counter-increment:s}
@@ -231,7 +232,7 @@ footer{padding:40px 0;color:var(--dim);font-size:13px;text-align:center}
 <section id="viewports" style="background:var(--alt)"><div class="wrap vp">
 <div><h2>Every screen. Same quality.</h2><p>See your site the way your visitors do, from a 1920-wide monitor to a phone in a pocket.</p>
 <div class="tabs" role="tablist"><button class="tab" role="tab" data-w="1920" data-h="1080" aria-selected="false">Desktop</button><button class="tab" role="tab" data-w="1280" data-h="720" aria-selected="true">Laptop</button><button class="tab" role="tab" data-w="768" data-h="1024" aria-selected="false">Tablet</button><button class="tab" role="tab" data-w="390" data-h="844" aria-selected="false">iPhone 14</button></div></div>
-<div class="vstage"><div class="frame" id="fr"><div>1280 × 720<small>Standard Laptop</small></div></div></div>
+<div class="vstage" id="vs"><div class="frame" id="fr"><div>1280 × 720<small>Laptop</small></div></div></div>
 </div></section>
 
 <section id="how"><div class="wrap">
@@ -357,14 +358,26 @@ go.onclick=()=>{
   }})();
 };
 
-const fr=$('#fr');
+/* Viewport section: frame size is proportional to the real pixel size,
+   so Desktop (1920×1080) is visibly larger than Laptop (1280×720). */
+const fr=$('#fr'),vs=$('#vs');
+let cur={w:1280,h:720,name:'Laptop'};
+function sizeFrame(){
+ // same scale factor for every device (max 0.22, shrinks on narrow screens)
+ const k=Math.min(0.22,(vs.clientWidth*0.9)/1920);
+ fr.style.width=Math.max(60,Math.round(cur.w*k))+'px';
+ fr.style.height=Math.max(60,Math.round(cur.h*k))+'px';
+ fr.style.fontSize=(cur.w<500?12:cur.w<800?14:cur.w<1500?16:22)+'px';
+}
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
  document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected','false'));
  t.setAttribute('aria-selected','true');
- const w=+t.dataset.w,h=+t.dataset.h;
- fr.style.aspectRatio=w+'/'+h;fr.style.height=h>w?'340px':'270px';
- fr.firstChild.innerHTML=w+' × '+h+'<small>'+t.textContent+'</small>';
+ cur={w:+t.dataset.w,h:+t.dataset.h,name:t.textContent};
+ fr.firstChild.innerHTML=cur.w+' × '+cur.h+'<small>'+cur.name+'</small>';
+ sizeFrame();
 });
+addEventListener('resize',sizeFrame);
+sizeFrame();
 </script>
 </body>
 </html>
